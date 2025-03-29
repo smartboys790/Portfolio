@@ -63,25 +63,24 @@ function MainComponent() {
     if (Object.keys(newErrors).length === 0) {
       setIsSubmitting(true);
       try {
-        await fetch("/api/db/visitors-details", {
+        const response = await fetch("/api/contact", {
           method: "POST",
-          body: JSON.stringify({
-            query:
-              "INSERT INTO `contact_submissions` (name, email, phone, message, submission_time) VALUES (?, ?, ?, ?, ?)",
-            values: [
-              formData.name,
-              formData.email,
-              formData.phone,
-              formData.message,
-              new Date().toISOString(),
-            ],
-          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         });
+
+        if (!response.ok) {
+          throw new Error('Submission failed');
+        }
+
         setSubmitSuccess(true);
         setFormData({ name: "", email: "", phone: "", message: "" });
         setTimeout(() => setSubmitSuccess(false), 5000);
       } catch (error) {
         setErrors({ submit: "Failed to submit. Please try again." });
+        console.error('Error submitting form:', error);
       }
       setIsSubmitting(false);
     }
